@@ -7,7 +7,7 @@ Authors@R: c(
     person("Joe", "Cheng", role = c("aut", "cre"), email = "joe@rstudio.com")
     )
 Maintainer: Joe Cheng <joe@rstudio.com>
-Description:
+Description: Less flexible but much faster operations for Raster.
 License: GPL (>= 2)
 LazyData: TRUE
 Imports:
