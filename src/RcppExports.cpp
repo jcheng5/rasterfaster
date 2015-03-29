@@ -5,9 +5,9 @@
 
 using namespace Rcpp;
 
-// resample_files_double
-void resample_files_double(const std::string& from, int fromStride, int fromRows, int fromCols, const std::string& to, int toStride, int toRows, int toCols, const std::string& method);
-RcppExport SEXP rasterfaster_resample_files_double(SEXP fromSEXP, SEXP fromStrideSEXP, SEXP fromRowsSEXP, SEXP fromColsSEXP, SEXP toSEXP, SEXP toStrideSEXP, SEXP toRowsSEXP, SEXP toColsSEXP, SEXP methodSEXP) {
+// resample_files_numeric
+void resample_files_numeric(const std::string& from, int fromStride, int fromRows, int fromCols, const std::string& to, int toStride, int toRows, int toCols, const std::string& dataFormat, const std::string& method);
+RcppExport SEXP rasterfaster_resample_files_numeric(SEXP fromSEXP, SEXP fromStrideSEXP, SEXP fromRowsSEXP, SEXP fromColsSEXP, SEXP toSEXP, SEXP toStrideSEXP, SEXP toRowsSEXP, SEXP toColsSEXP, SEXP dataFormatSEXP, SEXP methodSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope __rngScope;
     Rcpp::traits::input_parameter< const std::string& >::type from(fromSEXP);
@@ -18,8 +18,9 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type toStride(toStrideSEXP);
     Rcpp::traits::input_parameter< int >::type toRows(toRowsSEXP);
     Rcpp::traits::input_parameter< int >::type toCols(toColsSEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type dataFormat(dataFormatSEXP);
     Rcpp::traits::input_parameter< const std::string& >::type method(methodSEXP);
-    resample_files_double(from, fromStride, fromRows, fromCols, to, toStride, toRows, toCols, method);
+    resample_files_numeric(from, fromStride, fromRows, fromCols, to, toStride, toRows, toCols, dataFormat, method);
     return R_NilValue;
 END_RCPP
 }

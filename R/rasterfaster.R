@@ -34,7 +34,7 @@ resampleLayer <- function(x, y, method = c("bilinear", "ngb")) {
   if (!inherits(x[1, 1], "numeric")) {
     stop("resampleLayer only works on numeric values")
   }
-  if (!identical(x@file@datanotation, "FLT8S")) {
+  if (!isTRUE(x@file@datanotation %in% c("FLT4S", "FLT8S"))) {
     stop("resampleLayer only works on double-precision raster files")
   }
 
@@ -45,13 +45,19 @@ resampleLayer <- function(x, y, method = c("bilinear", "ngb")) {
     writeStop(wh)  # Rightfully warns about data not being present
   )
 
-  outsize <- ncell(y) * 8  # 8 bytes per cell for numeric
+  dataWidth <- switch(x@file@datanotation,
+    FLT4S = 4,
+    FLT8S = 8,
+    stop("Unsupported data notation ", x@file@datanotation)
+  )
+
+  outsize <- ncell(y) * dataWidth
   forceFileToLength(grdToGri(outfile), outsize)
 
   inFile <- grdToGri(x@file@name)
-  resample_files_double(inFile, raster::ncol(x), raster::nrow(x), raster::ncol(x),
+  resample_files_numeric(inFile, raster::ncol(x), raster::nrow(x), raster::ncol(x),
     grdToGri(outfile), raster::ncol(y), raster::nrow(y), raster::ncol(y),
-    method
+    x@file@datanotation, method
   )
 
   result <- raster(outfile)
@@ -71,8 +77,9 @@ resampleLayer <- function(x, y, method = c("bilinear", "ngb")) {
 #' @return Resampled raster.
 #' @examples
 #' library(raster)
-#' src <- raster(system.file("external/test.grd", package="raster"))
-#' system.time(result <- resampleBy(src, 0.63))
+#' src <- raster(system.file("sample.grd", package = "rasterfaster"))
+#' plot(src)
+#' system.time(result <- resampleBy(src, 8.4))
 #' plot(result)
 #' @export
 resampleBy <- function(x, factor, method = c("bilinear", "ngb")) {

@@ -26,20 +26,35 @@ void resample_files(const Algo& algo,
 }
 
 // [[Rcpp::export]]
-void resample_files_double(
+void resample_files_numeric(
     const std::string& from, int fromStride, int fromRows, int fromCols,
     const std::string& to, int toStride, int toRows, int toCols,
+    const std::string& dataFormat,
     const std::string& method) {
 
-  if (method == "bilinear") {
-    Bilinear<double> bln;
-    resample_files<double, Bilinear<double> >(bln, from, fromStride, fromRows, fromCols,
-      to, toStride, toRows, toCols);
-  } else if (method == "ngb") {
-    NearestNeighbor<double> nn;
-    resample_files<double, NearestNeighbor<double> >(nn, from, fromStride, fromRows, fromCols,
-      to, toStride, toRows, toCols);
-  } else {
-    Rcpp::stop("Unknown resampling method %s", method);
+  if (dataFormat == "FLT8S") {
+    if (method == "bilinear") {
+      Bilinear<double> bln;
+      resample_files<double, Bilinear<double> >(bln, from, fromStride, fromRows, fromCols,
+        to, toStride, toRows, toCols);
+    } else if (method == "ngb") {
+      NearestNeighbor<double> nn;
+      resample_files<double, NearestNeighbor<double> >(nn, from, fromStride, fromRows, fromCols,
+        to, toStride, toRows, toCols);
+    } else {
+      Rcpp::stop("Unknown resampling method %s", method);
+    }
+  } else if (dataFormat == "FLT4S") {
+    if (method == "bilinear") {
+      Bilinear<float> bln;
+      resample_files<float, Bilinear<float> >(bln, from, fromStride, fromRows, fromCols,
+        to, toStride, toRows, toCols);
+    } else if (method == "ngb") {
+      NearestNeighbor<float> nn;
+      resample_files<float, NearestNeighbor<float> >(nn, from, fromStride, fromRows, fromCols,
+        to, toStride, toRows, toCols);
+    } else {
+      Rcpp::stop("Unknown resampling method %s", method);
+    }
   }
 }

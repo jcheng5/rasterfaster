@@ -29,8 +29,9 @@ Resample a numeric RasterLayer
 }
 \examples{
 library(raster)
-src <- raster(system.file("external/test.grd", package="raster"))
-system.time(result <- resampleBy(src, 0.63))
+src <- raster(system.file("sample.grd", package = "rasterfaster"))
+plot(src)
+system.time(result <- resampleBy(src, 8.4))
 plot(result)
 }
 

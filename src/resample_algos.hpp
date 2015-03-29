@@ -47,8 +47,8 @@ public:
 
     for (index_t x = 0; x < tgt.ncol(); x++) {
       for (index_t y = 0; y < tgt.nrow(); y++) {
-        double srcX = xRatio * x;
-        double srcY = yRatio * y;
+        double srcX = xRatio * x - 0.5;
+        double srcY = yRatio * y - 0.5;
 
         //std::cout << srcX << "," << srcY << "\n";
 
