@@ -1,0 +1,18 @@
+Package: rasterfaster
+Type: Package
+Title: Fast operations for Raster objects
+Version: 0.1
+Date: 2015-03-28
+Authors@R: c(
+    person("Joe", "Cheng", role = c("aut", "cre"), email = "joe@rstudio.com")
+    )
+Maintainer: Joe Cheng <joe@rstudio.com>
+Description:
+License: GPL (>= 2)
+LazyData: TRUE
+Imports:
+    Rcpp (>= 0.11.3),
+    raster
+LinkingTo:
+    Rcpp,
+    BH
