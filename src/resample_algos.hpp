@@ -13,8 +13,14 @@ public:
     float xRatio = static_cast<float>(src.ncol()) / tgt.ncol();
     float yRatio = static_cast<float>(src.nrow()) / tgt.nrow();
 
+    index_t i = 0;
+
     for (index_t toCol = 0; toCol < tgt.ncol(); toCol++) {
       for (index_t toRow = 0; toRow < tgt.nrow(); toRow++) {
+        if ((++i % 10000) == 0) {
+          Rcpp::checkUserInterrupt();
+        }
+
         // nearest neighbor
         *tgt.at(toRow, toCol) = *src.at(
           static_cast<index_t>(toRow * yRatio),
@@ -45,8 +51,15 @@ public:
     double xRatio = static_cast<double>(src.ncol()) / tgt.ncol();
     double yRatio = static_cast<double>(src.nrow()) / tgt.nrow();
 
+    index_t i = 0;
+
     for (index_t x = 0; x < tgt.ncol(); x++) {
       for (index_t y = 0; y < tgt.nrow(); y++) {
+
+        if ((++i % 10000) == 0) {
+          Rcpp::checkUserInterrupt();
+        }
+
         double srcX = xRatio * x - 0.5;
         double srcY = yRatio * y - 0.5;
 
