@@ -16,7 +16,7 @@ In particular, `raster::resample(method="ngb")` is strangely slow for large `.gr
 The gap is much narrower so far for bilinear:
 
 ```r
-> system.time(raster::resample(r, raster(nrow=100, ncol=100), method='bilinear'))
+> system.time(raster::resample(r, raster(nrow=100, ncol=100), method="bilinear"))
    user  system elapsed 
   2.151   0.264   2.628 
 > system.time(rasterfaster::resampleTo(r, 100, 100, method="bilinear"))
@@ -28,8 +28,8 @@ Take these benchmarks with a huge grain of salt, as the performance will undoubt
 
 ## Features
 
-1. Resampling - nearest neighbor (implemented) and bilinear (in progress)
-2. Projection (not implemented)
+1. Resampling (nearest neighbor and bilinear)
+2. WGS84 to Web Mercator projection, and map tile extraction
 
 Currently only `.grd` files (as created by `raster::writeRaster`) with `numeric` data are supported.
 
