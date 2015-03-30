@@ -5,8 +5,9 @@
 #include "resample_algos.hpp"
 #include "project_webmercator.hpp"
 
-template <class T>
+template <class T, class TInterpolator>
 void project_webmercator_files(
+    TInterpolator interp,
     const std::string& from, index_t fromStride, index_t fromRows, index_t fromCols,
     int lng1, int lng2, int lat1, int lat2,
     const std::string& to, index_t toStride, index_t toRows, index_t toCols,
@@ -20,8 +21,7 @@ void project_webmercator_files(
   Grid<T> from_g(from_f.begin(), from_f.end(), fromStride, fromRows, fromCols);
   Grid<T> to_g(to_f.begin(), to_f.end(), toStride, toRows, toCols);
 
-  Bilinear<double> interp;
-  project_webmercator<double, Bilinear<double> >(interp, from_g, lat1, lat2, lng1, lng2,
+  project_webmercator<double, TInterpolator>(interp, from_g, lat1, lat2, lng1, lng2,
     to_g, x, totalWidth, y, totalHeight);
 //
 //  const Grid<T>& src, double lat1, double lat2, double lng1, double lng2,
@@ -38,8 +38,19 @@ void project_webmercator(
     int x, int y, int totalWidth, int totalHeight,
     const std::string& dataFormat, const std::string& method
 ) {
-  project_webmercator_files<double>(
-    from, fromStride, fromRows, fromCols, lng1, lng2, lat1, lat2,
-    to, toStride, toRows, toCols, x, y, totalWidth, totalHeight
-  );
+  if (method == "bilinear") {
+    Bilinear<double> bln;
+    project_webmercator_files<double, Bilinear<double> >(bln,
+      from, fromStride, fromRows, fromCols, lng1, lng2, lat1, lat2,
+      to, toStride, toRows, toCols, x, y, totalWidth, totalHeight
+    );
+  } else if (method == "ngb") {
+    NearestNeighbor<double> nn;
+    project_webmercator_files<double, NearestNeighbor<double> >(nn,
+      from, fromStride, fromRows, fromCols, lng1, lng2, lat1, lat2,
+      to, toStride, toRows, toCols, x, y, totalWidth, totalHeight
+    );
+  } else {
+    Rcpp::stop("Unknown interpolation method %s", method);
+  }
 }

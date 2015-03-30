@@ -113,6 +113,20 @@ resampleTo <- function(x, nrow = 180, ncol = 360, method = c("bilinear", "ngb"))
   resampleLayer(x, y, method)
 }
 
+#' Create a web map tile
+#'
+#' @param x A \code{Raster} object (as created by \code{raster::raster()}) with
+#'   unprojected WGS84 data. It's not required to contain the entire 360-by-180
+#'   degree world.
+#' @param width The width of the tile to create.
+#' @param height The height of the tile to create.
+#' @param xtile The x-number of the tile.
+#' @param ytile The y-number of the tile.
+#' @param zoom The zoom level of the tile.
+#' @param method The type of interpolation to use.
+#'
+#' @return A \code{Raster} object.
+#'
 #' @export
 createMapTile <- function(x, width, height, xtile, ytile, zoom,
   method = c("bilinear", "ngb")) {

@@ -54,7 +54,7 @@ void resample_files_numeric(
       resample_files<float, NearestNeighbor<float> >(nn, from, fromStride, fromRows, fromCols,
         to, toStride, toRows, toCols);
     } else {
-      Rcpp::stop("Unknown resampling method %s", method);
+      Rcpp::stop("Unknown interpolation method %s", method);
     }
   }
 }
