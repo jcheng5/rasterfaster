@@ -5,6 +5,33 @@
 
 using namespace Rcpp;
 
+// project_webmercator
+void project_webmercator(const std::string& from, int fromStride, int fromRows, int fromCols, int lng1, int lng2, int lat1, int lat2, const std::string& to, int toStride, int toRows, int toCols, int x, int y, int totalWidth, int totalHeight, const std::string& dataFormat, const std::string& method);
+RcppExport SEXP rasterfaster_project_webmercator(SEXP fromSEXP, SEXP fromStrideSEXP, SEXP fromRowsSEXP, SEXP fromColsSEXP, SEXP lng1SEXP, SEXP lng2SEXP, SEXP lat1SEXP, SEXP lat2SEXP, SEXP toSEXP, SEXP toStrideSEXP, SEXP toRowsSEXP, SEXP toColsSEXP, SEXP xSEXP, SEXP ySEXP, SEXP totalWidthSEXP, SEXP totalHeightSEXP, SEXP dataFormatSEXP, SEXP methodSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< const std::string& >::type from(fromSEXP);
+    Rcpp::traits::input_parameter< int >::type fromStride(fromStrideSEXP);
+    Rcpp::traits::input_parameter< int >::type fromRows(fromRowsSEXP);
+    Rcpp::traits::input_parameter< int >::type fromCols(fromColsSEXP);
+    Rcpp::traits::input_parameter< int >::type lng1(lng1SEXP);
+    Rcpp::traits::input_parameter< int >::type lng2(lng2SEXP);
+    Rcpp::traits::input_parameter< int >::type lat1(lat1SEXP);
+    Rcpp::traits::input_parameter< int >::type lat2(lat2SEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type to(toSEXP);
+    Rcpp::traits::input_parameter< int >::type toStride(toStrideSEXP);
+    Rcpp::traits::input_parameter< int >::type toRows(toRowsSEXP);
+    Rcpp::traits::input_parameter< int >::type toCols(toColsSEXP);
+    Rcpp::traits::input_parameter< int >::type x(xSEXP);
+    Rcpp::traits::input_parameter< int >::type y(ySEXP);
+    Rcpp::traits::input_parameter< int >::type totalWidth(totalWidthSEXP);
+    Rcpp::traits::input_parameter< int >::type totalHeight(totalHeightSEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type dataFormat(dataFormatSEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type method(methodSEXP);
+    project_webmercator(from, fromStride, fromRows, fromCols, lng1, lng2, lat1, lat2, to, toStride, toRows, toCols, x, y, totalWidth, totalHeight, dataFormat, method);
+    return R_NilValue;
+END_RCPP
+}
 // resample_files_numeric
 void resample_files_numeric(const std::string& from, int fromStride, int fromRows, int fromCols, const std::string& to, int toStride, int toRows, int toCols, const std::string& dataFormat, const std::string& method);
 RcppExport SEXP rasterfaster_resample_files_numeric(SEXP fromSEXP, SEXP fromStrideSEXP, SEXP fromRowsSEXP, SEXP fromColsSEXP, SEXP toSEXP, SEXP toStrideSEXP, SEXP toRowsSEXP, SEXP toColsSEXP, SEXP dataFormatSEXP, SEXP methodSEXP) {
