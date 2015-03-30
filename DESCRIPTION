@@ -11,7 +11,7 @@ Description: Less flexible but much faster operations for Raster.
 License: GPL (>= 2)
 LazyData: TRUE
 Imports:
-    Rcpp (>= 0.11.3),
+    Rcpp (>= 0.11.5),
     raster,
     sp
 LinkingTo:
