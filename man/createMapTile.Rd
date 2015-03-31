@@ -21,6 +21,11 @@ degree world.}
 \item{ytile}{The y-number of the tile.}
 
 \item{zoom}{The zoom level of the tile.}
+
+\item{method}{The type of interpolation to use.}
+}
+\value{
+A \code{Raster} object.
 }
 \description{
 Create a web map tile

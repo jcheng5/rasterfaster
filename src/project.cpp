@@ -1,4 +1,6 @@
 #include <Rcpp.h>
+// [[Rcpp::depends(RcppParallel)]]
+#include <RcppParallel.h>
 
 #include "mmfile.hpp"
 #include "grid.hpp"

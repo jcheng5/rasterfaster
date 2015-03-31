@@ -12,8 +12,10 @@ License: GPL (>= 2)
 LazyData: TRUE
 Imports:
     Rcpp (>= 0.11.5),
+    RcppParallel,
     raster,
     sp
 LinkingTo:
     Rcpp,
+    RcppParallel,
     BH

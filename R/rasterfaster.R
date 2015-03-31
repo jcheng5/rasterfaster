@@ -1,6 +1,7 @@
 #' @import raster
 #' @useDynLib rasterfaster
 #' @importFrom Rcpp evalCpp
+#' @importFrom RcppParallel RcppParallelLibs
 
 grdToGri <- function(filename) {
   sub("\\.grd$", ".gri", filename)

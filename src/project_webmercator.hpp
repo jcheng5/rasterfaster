@@ -3,21 +3,58 @@
 
 #include <cmath>
 
+#include <RcppParallel.h>
+
 #include "grid.hpp"
 #include "resample_algos.hpp"
 
 using namespace Rcpp;
 
-// Reverse-project x and y values (between 0 and 1) to lng/lat in degrees.
 template <class T>
-static inline void reverse_project_webmercator_one(
-    double x, double y, double* lng, double* lat
-  ) {
+struct WebMercatorProjection {
+  // Reverse-project x and y values (between 0 and 1) to lng/lat in degrees.
+  void reverse(double x, double y, double* lng, double* lat) {
+    *lng = x * 360 - 180;
+    double lat_rad = atan(sinh(PI * (1 - 2*y)));
+    *lat = lat_rad * 180 / PI;
+  }
+};
 
-  *lng = x * 360 - 180;
-  double lat_rad = atan(sinh(PI * (1 - 2*y)));
-  *lat = lat_rad * 180 / PI;
-}
+template <class T, class TInterpolator, class TProjection>
+struct ProjectionWorker : public RcppParallel::Worker {
+  TProjection* pProj;
+  TInterpolator* pInterp;
+  const Grid<T>* pSrc;
+  double lat1, lat2, lng1, lng2;
+  const Grid<T>* pTgt;
+  index_t xOrigin, xTotal, yOrigin, yTotal;
+
+  ProjectionWorker(TProjection* pProj, TInterpolator* pInterp,
+    const Grid<T>* pSrc, double lat1, double lat2, double lng1, double lng2,
+    const Grid<T>* pTgt, index_t xOrigin, index_t xTotal, index_t yOrigin, index_t yTotal
+  ) : pInterp(pInterp), pSrc(pSrc), lat1(lat1), lat2(lat2), lng1(lng1), lng2(lng2),
+      pTgt(pTgt), xOrigin(xOrigin), xTotal(xTotal), yOrigin(yOrigin), yTotal(yTotal) {
+  }
+
+  void operator()(size_t begin, size_t end) {
+    for (size_t i = begin; i < end; i++) {
+      size_t x = i / pTgt->nrow();
+      size_t y = i % pTgt->nrow();
+
+      double lng, lat;
+
+      double xNorm = (static_cast<double>(x) + xOrigin) / xTotal;
+      double yNorm = (static_cast<double>(y) + yOrigin) / yTotal;
+
+      pProj->reverse(xNorm, yNorm, &lng, &lat);
+
+      double srcX = (lng + 180) / 360 * pSrc->ncol();
+      double srcY = (1 - (lat + 90) / 180) * pSrc->nrow();
+
+      *pTgt->at(y, x) = pInterp->getValue(*pSrc, srcX, srcY);
+    }
+  }
+};
 
 /**
  * Create a web mercator projection of the given WGS84 data. The projection
@@ -41,21 +78,12 @@ void project_webmercator(TInterpolator interp,
   const Grid<T>& src, double lat1, double lat2, double lng1, double lng2,
   const Grid<T>& tgt, index_t xOrigin, index_t xTotal, index_t yOrigin, index_t yTotal) {
 
-  for (index_t y = 0; y < tgt.nrow(); y++) {
-    for (index_t x = 0; x < tgt.ncol(); x++) {
-      double lng, lat;
+  WebMercatorProjection<T> proj;
+  ProjectionWorker<T, TInterpolator, WebMercatorProjection<T> > worker(
+      &proj, &interp, &src, lat1, lat2, lng1, lng2,
+      &tgt, xOrigin, xTotal, yOrigin, yTotal);
 
-      double xNorm = (static_cast<double>(x) + xOrigin) / xTotal;
-      double yNorm = (static_cast<double>(y) + yOrigin) / yTotal;
-
-      reverse_project_webmercator_one<T>(xNorm, yNorm, &lng, &lat);
-
-      double srcX = (lng + 180) / 360 * src.ncol();
-      double srcY = (1 - (lat + 90) / 180) * src.nrow();
-
-      *tgt.at(y, x) = interp.getValue(src, srcX, srcY);
-    }
-  }
+  RcppParallel::parallelFor(0, tgt.nrow() * tgt.ncol(), worker, 256);
 }
 
 #endif
