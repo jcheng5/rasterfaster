@@ -124,15 +124,18 @@ resampleTo <- function(x, nrow = 180, ncol = 360, method = c("bilinear", "ngb"))
 #' @param xtile The x-number of the tile.
 #' @param ytile The y-number of the tile.
 #' @param zoom The zoom level of the tile.
-#' @param method The type of interpolation to use.
+#' @param method The type of interpolation to use. \code{"auto"} (the default)
+#'   means bilinear when reducing, and nearest neighbor when enlarging.
 #'
 #' @return A \code{Raster} object.
 #'
 #' @export
 createMapTile <- function(x, width, height, xtile, ytile, zoom,
-  method = c("bilinear", "ngb")) {
+  method = c("auto", "bilinear", "ngb")) {
 
   method <- match.arg(method)
+
+  # TODO: Validate parameters
 
   y <- x
   raster::ncol(y) <- width
@@ -145,6 +148,20 @@ createMapTile <- function(x, width, height, xtile, ytile, zoom,
   verifyInputRaster(x, "createMapTile")
   outfile <- createOutputGrdFile(x, y)
   inFile <- grdToGri(x@file@name)
+
+  if (identical(method, "auto")) {
+    # Determine if source resolution is greater than target resolution, so we
+    # can use bilinear to reduce, but nearest neighbor to enlarge.
+    srcResX <- raster::ncol(x) / (xmax(x) - xmin(x))
+    srcResY <- raster::nrow(x) / (ymax(x) - ymin(x))
+    tgtResX <- 2^zoom * width / 360
+    tgtResY <- 2^zoom * height / 180
+    method <- if (srcResX >= tgtResX || srcResY >= tgtResY) {
+      "bilinear"
+    } else {
+      "ngb"
+    }
+  }
 
   project_webmercator(inFile, raster::ncol(x), raster::nrow(x), raster::ncol(x),
     xmin(x), xmax(x), ymin(x), ymax(x),
