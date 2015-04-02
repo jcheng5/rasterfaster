@@ -33,9 +33,6 @@ verifyInputRaster <- function(x, labelForError) {
   if (!inherits(x[1, 1], "numeric")) {
     stop(labelForError, " only works on numeric values")
   }
-  if (!isTRUE(x@file@datanotation %in% c("FLT4S", "FLT8S"))) {
-    stop(labelForError, " only works on double-precision raster files")
-  }
 }
 
 createOutputGrdFile <- function(x, y, filename = tempfile(fileext = ".grd")) {
@@ -44,15 +41,22 @@ createOutputGrdFile <- function(x, y, filename = tempfile(fileext = ".grd")) {
   }
 
   # Create the .grd header and a dummy (empty) .gri file
-  wh <- writeStart(y, filename)
+  wh <- writeStart(y, filename, datatype = dataType(y))
   suppressWarnings(
     writeStop(wh)  # Rightfully warns about data not being present
   )
 
-  dataWidth <- switch(x@file@datanotation,
-    FLT4S = 4,
+  dataWidth <- switch(dataType(y),
     FLT8S = 8,
-    stop("Unsupported data notation ", x@file@datanotation)
+    FLT4S = 4,
+    INT4U = 4,
+    INT4S = 4,
+    INT2U = 2,
+    INT2S = 2,
+    INT1U = 1,
+    INT1S = 1,
+    LOG1S = 1,
+    stop("Unsupported data notation ", dataType(y))
   )
 
   outsize <- ncell(y) * dataWidth
@@ -131,8 +135,9 @@ resampleTo <- function(x, nrow = 180, ncol = 360, method = c("bilinear", "ngb"))
 #'
 #' @export
 createMapTile <- function(x, width, height, xtile, ytile, zoom,
-  method = c("auto", "bilinear", "ngb")) {
+  projection = c("epsg:3857"), method = c("auto", "bilinear", "ngb")) {
 
+  projection <- match.arg(projection)
   method <- match.arg(method)
 
   # TODO: Validate parameters
@@ -163,7 +168,7 @@ createMapTile <- function(x, width, height, xtile, ytile, zoom,
     }
   }
 
-  project_webmercator(inFile, raster::ncol(x), raster::nrow(x), raster::ncol(x),
+  do_project(projection, inFile, raster::ncol(x), raster::nrow(x), raster::ncol(x),
     xmin(x), xmax(x), ymin(x), ymax(x),
     grdToGri(outfile), raster::ncol(y), raster::nrow(y), raster::ncol(y),
     xtile * width, ytile * height, 2^zoom * width, 2^zoom * height,

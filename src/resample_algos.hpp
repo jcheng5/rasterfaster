@@ -4,10 +4,20 @@
 #include <algorithm>
 #include <iostream>
 
+#include <boost/shared_ptr.hpp>
+
 #include "grid.hpp"
 
+template <class T>
+class Interpolator {
+public:
+  virtual ~Interpolator() {}
+  virtual T getValue(const Grid<T>& src, double x, double y) const = 0;
+
+};
+
 template<class T>
-class NearestNeighbor {
+class NearestNeighbor : public Interpolator<T> {
 public:
   T getValue(const Grid<T>& src, double x, double y) const {
     return *src.at(
@@ -30,9 +40,9 @@ static inline double linear_interp(double pos,
 }
 
 template<class T>
-class Bilinear {
+class Bilinear : public Interpolator<T> {
 public:
-  double getValue(const Grid<T>& src, double x, double y) const {
+  T getValue(const Grid<T>& src, double x, double y) const {
     index_t x1 = std::floor(x), x2 = std::ceil(x);
     index_t y1 = std::floor(y), y2 = std::ceil(y);
 
@@ -47,9 +57,20 @@ public:
     // Combine the two southern points using linear interpolation.
     double s = linear_interp(x, x1, x2, sw, se);
     // Combine the calculated north and south values.
-    return linear_interp(y, y1, y2, n, s);
+    // TODO: Should this be rounding instead of casting?
+    return static_cast<T>(linear_interp(y, y1, y2, n, s));
   }
 };
 
-#endif
+template <class T>
+boost::shared_ptr<Interpolator<T> > getInterpolator(const std::string& name) {
+  if (name == "ngb") {
+    return boost::shared_ptr<Interpolator<T> >(new NearestNeighbor<T>());
+  } else if (name == "bilinear") {
+    return boost::shared_ptr<Interpolator<T> >(new Bilinear<T>());
+  } else {
+    return boost::shared_ptr<Interpolator<T> >();
+  }
+}
 
+#endif

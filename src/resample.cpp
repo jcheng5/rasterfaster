@@ -1,3 +1,4 @@
+#include <boost/cstdint.hpp>
 #include <Rcpp.h>
 #include <RcppParallel.h>
 #include "mmfile.hpp"
@@ -10,16 +11,16 @@ using namespace Rcpp;
 //  NumericVector y   = NumericVector::create(0.0, 1.0);
 //  List z            = List::create(x, y);
 
-template <class T, class TInterpolator>
+template <class T>
 class ResampleWorker : public RcppParallel::Worker {
   Grid<T>* pSrc;
   Grid<T>* pTgt;
-  const TInterpolator* pInterp;
+  const Interpolator<T>* pInterp;
   double xRatio;
   double yRatio;
 
 public:
-  ResampleWorker(Grid<T>* pSrc, Grid<T>* pTgt, const TInterpolator* pInterp) :
+  ResampleWorker(Grid<T>* pSrc, Grid<T>* pTgt, const Interpolator<T>* pInterp) :
   pSrc(pSrc), pTgt(pTgt), pInterp(pInterp) {
     xRatio = static_cast<double>(pSrc->ncol()) / pTgt->ncol();
     yRatio = static_cast<double>(pSrc->nrow()) / pTgt->nrow();
@@ -36,10 +37,15 @@ public:
   }
 };
 
-template<class T, class Algo>
-void resample_files(const Algo& algo,
+template<class T>
+void resample_files(const std::string& method,
   const std::string& from, index_t fromStride, index_t fromRows, index_t fromCols,
   const std::string& to, index_t toStride, index_t toRows, index_t toCols) {
+
+  boost::shared_ptr<Interpolator<T> > interp = getInterpolator<T>(method);
+  if (!interp) {
+    Rcpp::stop("Unknown resampling method %s", method);
+  }
 
   // Memory mapped files
   MMFile<T> from_f(from, boost::interprocess::read_only);
@@ -49,7 +55,7 @@ void resample_files(const Algo& algo,
   Grid<T> from_g(from_f.begin(), from_f.end(), fromStride, fromRows, fromCols);
   Grid<T> to_g(to_f.begin(), to_f.end(), toStride, toRows, toCols);
 
-  ResampleWorker<T, Algo> worker(&from_g, &to_g, &algo);
+  ResampleWorker<T> worker(&from_g, &to_g, interp.get());
   RcppParallel::parallelFor(0, toRows * toCols, worker);
 }
 
@@ -61,28 +67,24 @@ void resample_files_numeric(
     const std::string& method) {
 
   if (dataFormat == "FLT8S") {
-    if (method == "bilinear") {
-      Bilinear<double> bln;
-      resample_files<double, Bilinear<double> >(bln, from, fromStride, fromRows, fromCols,
-        to, toStride, toRows, toCols);
-    } else if (method == "ngb") {
-      NearestNeighbor<double> nn;
-      resample_files<double, NearestNeighbor<double> >(nn, from, fromStride, fromRows, fromCols,
-        to, toStride, toRows, toCols);
-    } else {
-      Rcpp::stop("Unknown resampling method %s", method);
-    }
+    resample_files<double>(method, from, fromStride, fromRows, fromCols, to, toStride, toRows, toCols);
   } else if (dataFormat == "FLT4S") {
-    if (method == "bilinear") {
-      Bilinear<float> bln;
-      resample_files<float, Bilinear<float> >(bln, from, fromStride, fromRows, fromCols,
-        to, toStride, toRows, toCols);
-    } else if (method == "ngb") {
-      NearestNeighbor<float> nn;
-      resample_files<float, NearestNeighbor<float> >(nn, from, fromStride, fromRows, fromCols,
-        to, toStride, toRows, toCols);
-    } else {
-      Rcpp::stop("Unknown interpolation method %s", method);
-    }
+    resample_files<float>(method, from, fromStride, fromRows, fromCols, to, toStride, toRows, toCols);
+  } else if (dataFormat == "INT4U") {
+    resample_files<uint32_t>(method, from, fromStride, fromRows, fromCols, to, toStride, toRows, toCols);
+  } else if (dataFormat == "INT4S") {
+    resample_files<int32_t>(method, from, fromStride, fromRows, fromCols, to, toStride, toRows, toCols);
+  } else if (dataFormat == "INT2U") {
+    resample_files<uint16_t>(method, from, fromStride, fromRows, fromCols, to, toStride, toRows, toCols);
+  } else if (dataFormat == "INT2S") {
+    resample_files<int16_t>(method, from, fromStride, fromRows, fromCols, to, toStride, toRows, toCols);
+  } else if (dataFormat == "INT1U") {
+    resample_files<uint8_t>(method, from, fromStride, fromRows, fromCols, to, toStride, toRows, toCols);
+  } else if (dataFormat == "INT1S") {
+    resample_files<int8_t>(method, from, fromStride, fromRows, fromCols, to, toStride, toRows, toCols);
+  } else if (dataFormat == "LOG1S") {
+    resample_files<boolean_t>(method, from, fromStride, fromRows, fromCols, to, toStride, toRows, toCols);
+  } else {
+    Rcpp::stop("Unknown data format: %s", dataFormat);
   }
 }

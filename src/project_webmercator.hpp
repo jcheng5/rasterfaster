@@ -11,7 +11,16 @@
 using namespace Rcpp;
 
 template <class T>
-struct WebMercatorProjection {
+class Projection {
+public:
+  virtual ~Projection() {}
+
+  virtual void reverse(double x, double y, double* lng, double* lat) = 0;
+};
+
+template <class T>
+class WebMercatorProjection : public Projection<T> {
+public:
   // Reverse-project x and y values (between 0 and 1) to lng/lat in degrees.
   void reverse(double x, double y, double* lng, double* lat) {
     *lng = x * 360 - 180;
@@ -20,19 +29,20 @@ struct WebMercatorProjection {
   }
 };
 
-template <class T, class TInterpolator, class TProjection>
-struct ProjectionWorker : public RcppParallel::Worker {
-  TProjection* pProj;
-  TInterpolator* pInterp;
+template <class T>
+class ProjectionWorker : public RcppParallel::Worker {
+  Projection<T>* pProj;
+  Interpolator<T>* pInterp;
   const Grid<T>* pSrc;
   double lat1, lat2, lng1, lng2;
   const Grid<T>* pTgt;
   index_t xOrigin, xTotal, yOrigin, yTotal;
 
-  ProjectionWorker(TProjection* pProj, TInterpolator* pInterp,
+public:
+  ProjectionWorker(Projection<T>* pProj, Interpolator<T>* pInterp,
     const Grid<T>* pSrc, double lat1, double lat2, double lng1, double lng2,
     const Grid<T>* pTgt, index_t xOrigin, index_t xTotal, index_t yOrigin, index_t yTotal
-  ) : pInterp(pInterp), pSrc(pSrc), lat1(lat1), lat2(lat2), lng1(lng1), lng2(lng2),
+  ) : pProj(pProj), pInterp(pInterp), pSrc(pSrc), lat1(lat1), lat2(lat2), lng1(lng1), lng2(lng2),
       pTgt(pTgt), xOrigin(xOrigin), xTotal(xTotal), yOrigin(yOrigin), yTotal(yTotal) {
   }
 
@@ -56,6 +66,15 @@ struct ProjectionWorker : public RcppParallel::Worker {
   }
 };
 
+template <class T>
+boost::shared_ptr<Projection<T> > getProjection(const std::string& name) {
+  if (name == "epsg:3857") {
+    return boost::shared_ptr<Projection<T> >(new WebMercatorProjection<T>());
+  } else {
+    return boost::shared_ptr<Projection<T> >();
+  }
+}
+
 /**
  * Create a web mercator projection of the given WGS84 data. The projection
  * can be an arbitrary resolution and aspect ratio, and can be any rectangular
@@ -73,14 +92,13 @@ struct ProjectionWorker : public RcppParallel::Worker {
  *   projected is xTotal by yTotal pixels, the tgt is a square located at
  *   xOrigin and yOrigin.
  */
-template <class T, class TInterpolator>
-void project_webmercator(TInterpolator interp,
+template <class T>
+void project(Projection<T>* pProject, Interpolator<T>* pInterp,
   const Grid<T>& src, double lat1, double lat2, double lng1, double lng2,
   const Grid<T>& tgt, index_t xOrigin, index_t xTotal, index_t yOrigin, index_t yTotal) {
 
-  WebMercatorProjection<T> proj;
-  ProjectionWorker<T, TInterpolator, WebMercatorProjection<T> > worker(
-      &proj, &interp, &src, lat1, lat2, lng1, lng2,
+  ProjectionWorker<T> worker(
+      pProject, pInterp, &src, lat1, lat2, lng1, lng2,
       &tgt, xOrigin, xTotal, yOrigin, yTotal);
 
   RcppParallel::parallelFor(0, tgt.nrow() * tgt.ncol(), worker, 256);
