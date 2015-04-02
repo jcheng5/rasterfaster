@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <iostream>
+
 #include "grid.hpp"
 
 template<class T>
@@ -13,25 +14,6 @@ public:
         static_cast<index_t>(round(y)),
         static_cast<index_t>(round(x))
     );
-  }
-
-  void resample(const Grid<T>& src, const Grid<T>& tgt) const {
-
-    double xRatio = static_cast<double>(src.ncol()) / tgt.ncol();
-    double yRatio = static_cast<double>(src.nrow()) / tgt.nrow();
-
-    index_t i = 0;
-
-    for (index_t toCol = 0; toCol < tgt.ncol(); toCol++) {
-      for (index_t toRow = 0; toRow < tgt.nrow(); toRow++) {
-        if ((++i % 10000) == 0) {
-          Rcpp::checkUserInterrupt();
-        }
-
-        // nearest neighbor
-        *tgt.at(toRow, toCol) = getValue(src, toCol * xRatio, toRow * yRatio);
-      }
-    }
   }
 };
 
@@ -66,31 +48,6 @@ public:
     double s = linear_interp(x, x1, x2, sw, se);
     // Combine the calculated north and south values.
     return linear_interp(y, y1, y2, n, s);
-  }
-
-  void resample(const Grid<T>& src, const Grid<T>& tgt) const {
-
-    double xRatio = static_cast<double>(src.ncol()) / tgt.ncol();
-    double yRatio = static_cast<double>(src.nrow()) / tgt.nrow();
-
-    index_t i = 0;
-
-    for (index_t x = 0; x < tgt.ncol(); x++) {
-      for (index_t y = 0; y < tgt.nrow(); y++) {
-
-        if ((++i % 10000) == 0) {
-          Rcpp::checkUserInterrupt();
-        }
-
-        double srcX = xRatio * x - 0.5;
-        double srcY = yRatio * y - 0.5;
-
-        double result = getValue(src, srcX, srcY);
-
-        // Set the value.
-        *tgt.at(y, x) = static_cast<T>(result);  // TODO: round instead of cast??
-      }
-    }
   }
 };
 

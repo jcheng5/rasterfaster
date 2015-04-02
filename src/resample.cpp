@@ -1,4 +1,5 @@
 #include <Rcpp.h>
+#include <RcppParallel.h>
 #include "mmfile.hpp"
 #include "grid.hpp"
 #include "resample_algos.hpp"
@@ -8,6 +9,32 @@ using namespace Rcpp;
 //  CharacterVector x = CharacterVector::create("foo", "bar");
 //  NumericVector y   = NumericVector::create(0.0, 1.0);
 //  List z            = List::create(x, y);
+
+template <class T, class TInterpolator>
+class ResampleWorker : public RcppParallel::Worker {
+  Grid<T>* pSrc;
+  Grid<T>* pTgt;
+  const TInterpolator* pInterp;
+  double xRatio;
+  double yRatio;
+
+public:
+  ResampleWorker(Grid<T>* pSrc, Grid<T>* pTgt, const TInterpolator* pInterp) :
+  pSrc(pSrc), pTgt(pTgt), pInterp(pInterp) {
+    xRatio = static_cast<double>(pSrc->ncol()) / pTgt->ncol();
+    yRatio = static_cast<double>(pSrc->nrow()) / pTgt->nrow();
+  }
+
+  void operator()(size_t begin, size_t end) {
+    for (size_t i = begin; i < end; i++) {
+      size_t x = i / pTgt->nrow();
+      size_t y = i % pTgt->nrow();
+
+      *pTgt->at(y, x) = static_cast<T>(pInterp->getValue(*pSrc,
+        (x + 0.5) * xRatio - 0.5, (y + 0.5) * yRatio - 0.5));
+    }
+  }
+};
 
 template<class T, class Algo>
 void resample_files(const Algo& algo,
@@ -22,7 +49,8 @@ void resample_files(const Algo& algo,
   Grid<T> from_g(from_f.begin(), from_f.end(), fromStride, fromRows, fromCols);
   Grid<T> to_g(to_f.begin(), to_f.end(), toStride, toRows, toCols);
 
-  algo.resample(from_g, to_g);
+  ResampleWorker<T, Algo> worker(&from_g, &to_g, &algo);
+  RcppParallel::parallelFor(0, toRows * toCols, worker);
 }
 
 // [[Rcpp::export]]
