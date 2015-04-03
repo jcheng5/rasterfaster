@@ -1,5 +1,6 @@
 #include <boost/cstdint.hpp>
 #include <Rcpp.h>
+// [[Rcpp::depends(RcppParallel)]]
 #include <RcppParallel.h>
 #include "mmfile.hpp"
 #include "grid.hpp"
@@ -83,7 +84,10 @@ void resample_files_numeric(
   } else if (dataFormat == "INT1S") {
     resample_files<int8_t>(method, from, fromStride, fromRows, fromCols, to, toStride, toRows, toCols);
   } else if (dataFormat == "LOG1S") {
-    resample_files<boolean_t>(method, from, fromStride, fromRows, fromCols, to, toStride, toRows, toCols);
+    if (sizeof(bool) != 1) {
+      Rcpp::stop("The size of 'bool' on your architecture is not 1 byte. Please report this issue to the rasterfaster author.");
+    }
+    resample_files<bool>(method, from, fromStride, fromRows, fromCols, to, toStride, toRows, toCols);
   } else {
     Rcpp::stop("Unknown data format: %s", dataFormat);
   }

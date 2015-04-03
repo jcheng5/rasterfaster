@@ -65,6 +65,9 @@ void do_project(
   } else if (dataFormat == "INT1S") {
     project_files<int8_t>(name, method, from, fromStride, fromRows, fromCols, lng1, lng2, lat1, lat2, to, toStride, toRows, toCols, x, y, totalWidth, totalHeight);
   } else if (dataFormat == "LOG1S") {
+    if (sizeof(bool) != 1) {
+      Rcpp::stop("The size of 'bool' on your architecture is not 1 byte. Please report this issue to the rasterfaster author.");
+    }
     project_files<bool>(name, method, from, fromStride, fromRows, fromCols, lng1, lng2, lat1, lat2, to, toStride, toRows, toCols, x, y, totalWidth, totalHeight);
   } else {
     Rcpp::stop("Unknown data format: %s", dataFormat);
