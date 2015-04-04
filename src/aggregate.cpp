@@ -25,20 +25,8 @@ Vector<RTYPE> find_mode(const Vector<RTYPE>& x) {
   throw;
 }
 
-//' Find the mode for a vector
-//'
-//' Calculates the mode for integer, real, character, and logical vectors. In
-//' the event of a tie, a winner is chosen at random (using C's \code{rand()},
-//' so not affected by \code{\link[base:set.seed]{set.seed()}}, sorry!).
-//'
-//' @param x An integer, real, character, or logical vector
-//'
-//' @seealso Intended to be a faster, less flexible replacement for
-//'   \code{\link[raster:modal]{raster::modal}}.
-//'
-//' @export
 // [[Rcpp::export]]
-SEXP findMode(SEXP x) {
+SEXP doFindMode(SEXP x) {
   switch (TYPEOF(x)) {
   case INTSXP: return find_mode<INTSXP, int32_t>(x);
   case REALSXP: return find_mode<REALSXP, double>(x);

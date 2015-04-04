@@ -181,6 +181,27 @@ createMapTile <- function(x, width, height, xtile, ytile, zoom,
   result
 }
 
+#' Find the mode for a vector
+#'
+#' Calculates the mode for integer, real, character, and logical vectors. In
+#' the event of a tie, a winner is chosen at random (using C's \code{rand()},
+#' so not affected by \code{\link[base:set.seed]{set.seed()}}, sorry!).
+#'
+#' @param x An integer, real, character, or logical vector
+#' @param na.rm Logical. If \code{TRUE}, \code{NA} cells are removed.
+#'
+#' @seealso Intended to be a faster, less flexible replacement for
+#'   \code{\link[raster:modal]{raster::modal}}.
+#'
+#' @rdname findMode
+#' @name findMode
+#' @export
+findMode <- function(x, na.rm = FALSE) {
+  if (na.rm)
+    x <- na.rm(x)
+  doFindMode(x)
+}
+
 quote({
 library(rasterfaster);library(raster);library(digest);library(testthat)
 system.time(r <- resampleBy(raster("testdata/shipping.grd"), 0.5)); plot(r)

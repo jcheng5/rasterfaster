@@ -5,14 +5,14 @@
 
 using namespace Rcpp;
 
-// findMode
-SEXP findMode(SEXP x);
-RcppExport SEXP rasterfaster_findMode(SEXP xSEXP) {
+// doFindMode
+SEXP doFindMode(SEXP x);
+RcppExport SEXP rasterfaster_doFindMode(SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
     Rcpp::traits::input_parameter< SEXP >::type x(xSEXP);
-    __result = Rcpp::wrap(findMode(x));
+    __result = Rcpp::wrap(doFindMode(x));
     return __result;
 END_RCPP
 }
