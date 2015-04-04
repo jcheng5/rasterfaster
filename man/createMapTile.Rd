@@ -4,8 +4,8 @@
 \alias{createMapTile}
 \title{Create a web map tile}
 \usage{
-createMapTile(x, width, height, xtile, ytile, zoom, method = c("bilinear",
-  "ngb"))
+createMapTile(x, width, height, xtile, ytile, zoom,
+  projection = c("epsg:3857"), method = c("auto", "bilinear", "ngb"))
 }
 \arguments{
 \item{x}{A \code{Raster} object (as created by \code{raster::raster()}) with
@@ -22,7 +22,8 @@ degree world.}
 
 \item{zoom}{The zoom level of the tile.}
 
-\item{method}{The type of interpolation to use.}
+\item{method}{The type of interpolation to use. \code{"auto"} (the default)
+  means bilinear when reducing, and nearest neighbor when enlarging.}
 }
 \value{
 A \code{Raster} object.
