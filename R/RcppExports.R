@@ -5,7 +5,6 @@ doFindMode <- function(x) {
     .Call('rasterfaster_doFindMode', PACKAGE = 'rasterfaster', x)
 }
 
-#' @export
 findMean <- function(x) {
     .Call('rasterfaster_findMean', PACKAGE = 'rasterfaster', x)
 }

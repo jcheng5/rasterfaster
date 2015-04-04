@@ -43,7 +43,6 @@ double find_mean(SEXP x) {
   return mean(xv.begin(), xv.end());
 }
 
-//' @export
 // [[Rcpp::export]]
 double findMean(SEXP x) {
   switch (TYPEOF(x)) {

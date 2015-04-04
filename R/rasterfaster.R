@@ -198,7 +198,7 @@ createMapTile <- function(x, width, height, xtile, ytile, zoom,
 #' @export
 findMode <- function(x, na.rm = FALSE) {
   if (na.rm)
-    x <- na.rm(x)
+    x <- na.omit(x)
   doFindMode(x)
 }
 
