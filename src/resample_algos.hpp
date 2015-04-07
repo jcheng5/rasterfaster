@@ -7,23 +7,61 @@
 #include <boost/shared_ptr.hpp>
 
 #include "grid.hpp"
+#include "aggregate.hpp"
 
 template <class T>
 class Interpolator {
 public:
   virtual ~Interpolator() {}
-  virtual T getValue(const Grid<T>& src, double x, double y) const = 0;
+  virtual T getValue(const Grid<T>& src, double x, double y,
+    double xRatio, double yRatio) const = 0;
 
 };
 
 template<class T>
 class NearestNeighbor : public Interpolator<T> {
 public:
-  T getValue(const Grid<T>& src, double x, double y) const {
+  T getValue(const Grid<T>& src, double x, double y,
+    double xRatio, double yRatio) const {
+
     return *src.at(
         static_cast<index_t>(round(y)),
         static_cast<index_t>(round(x))
     );
+  }
+};
+
+template<class T>
+class NeighborMode : public Interpolator<T> {
+public:
+  T getValue(const Grid<T>& src, double x, double y,
+    double xRatio, double yRatio) const {
+
+    index_t width = static_cast<index_t>(floor(xRatio));
+    index_t height = static_cast<index_t>(floor(yRatio));
+
+    index_t left = static_cast<index_t>(round(x)) - (width/2);
+    index_t top = static_cast<index_t>(round(y)) - (height/2);
+    // Dividing then multiplying by 2 is to make sure the extent is an
+    // odd number, centered around round(x) or round(y).
+    // One of the +1 is for the same reason.
+    // The other +1 is to make right and bottom exclusive, not inclusive.
+    index_t right = left + (width/2)*2 + 1 + 1;
+    index_t bottom = top + (top/2)*2 + 1 + 1;
+
+    std::vector<T> vec(left*top);
+    for (index_t y1 = top; y1 < bottom; y1++) {
+      for (index_t x1 = left; x1 < right; x1++) {
+        vec.push_back(*src.at(y1, x1));
+      }
+    }
+
+    std::cerr << "[" << vec.size() << "]\n";
+
+    T result;
+    if (!mode<T>(vec, &result))
+      ; // what??
+    return result;
   }
 };
 
@@ -42,7 +80,9 @@ static inline double linear_interp(double pos,
 template<class T>
 class Bilinear : public Interpolator<T> {
 public:
-  T getValue(const Grid<T>& src, double x, double y) const {
+  T getValue(const Grid<T>& src, double x, double y,
+    double xRatio, double yRatio) const {
+
     index_t x1 = std::floor(x), x2 = std::ceil(x);
     index_t y1 = std::floor(y), y2 = std::ceil(y);
 
@@ -65,7 +105,8 @@ public:
 template <class T>
 boost::shared_ptr<Interpolator<T> > getInterpolator(const std::string& name) {
   if (name == "ngb") {
-    return boost::shared_ptr<Interpolator<T> >(new NearestNeighbor<T>());
+    //return boost::shared_ptr<Interpolator<T> >(new NearestNeighbor<T>());
+    return boost::shared_ptr<Interpolator<T> >(new NeighborMode<T>());
   } else if (name == "bilinear") {
     return boost::shared_ptr<Interpolator<T> >(new Bilinear<T>());
   } else {

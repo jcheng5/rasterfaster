@@ -1,3 +1,6 @@
+#ifndef AGGREGATE_HPP
+#define AGGREGATE_HPP
+
 #include <stdlib.h>
 #include <limits>
 #include <vector>
@@ -14,36 +17,8 @@ double mean(T* begin, T* end) {
   return result;
 }
 
-template<>
-double mean(double* begin, double* end) {
-  long double result = 0;
-  size_t length = end - begin;
-
-  for (double* p = begin; p != end; p++) {
-    result += static_cast<long double>(*p);
-  }
-  result /= length;
-
-  if (std::numeric_limits<long double>::infinity() != result) {
-    long double strip = 0;
-    for (double* p = begin; p != end; p++) {
-      strip += static_cast<long double>(*p) - result;
-    }
-    result += strip / length;
-  }
-
-  return result;
-}
-
-template <class T, class TIter>
-bool mode(TIter begin, TIter end, T* result) {
-  if (begin == end) {
-    // Can't take the mode of a zero values
-    return false;
-  }
-
-  // Copy the values into a vector we can mutate
-  std::vector<T> vec(begin, end);
+template <class T>
+bool mode(std::vector<T>& vec, T* result) {
   // Sort the values
   std::sort(vec.begin(), vec.end());
 
@@ -103,3 +78,17 @@ bool mode(TIter begin, TIter end, T* result) {
 
   return true;
 }
+
+template <class T, class TIter>
+bool mode(TIter begin, TIter end, T* result) {
+  if (begin == end) {
+    // Can't take the mode of a zero values
+    return false;
+  }
+
+  // Copy the values into a vector we can mutate
+  std::vector<T> vec(begin, end);
+  return mode<T>(vec, result);
+}
+
+#endif

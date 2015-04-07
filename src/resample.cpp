@@ -33,7 +33,8 @@ public:
       size_t y = i % pTgt->nrow();
 
       *pTgt->at(y, x) = static_cast<T>(pInterp->getValue(*pSrc,
-        (x + 0.5) * xRatio - 0.5, (y + 0.5) * yRatio - 0.5));
+        (x + 0.5) * xRatio - 0.5, (y + 0.5) * yRatio - 0.5,
+        xRatio, yRatio));
     }
   }
 };

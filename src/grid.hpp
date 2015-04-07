@@ -8,7 +8,7 @@
 typedef size_t index_t;
 
 // Grid is used to model a 2D matrix or strided array.
-template<class T>
+template <class T>
 class Grid {
   T* _begin;
   const index_t _stride;
@@ -40,6 +40,52 @@ public:
 
   const index_t ncol() const {
     return _ncol;
+  }
+};
+
+template <class T>
+class GridIterator {
+  const Grid<T>* _grid;
+  const index_t _startCol;
+  const index_t _endCol;
+  const index_t _startRow;
+  const index_t _endRow;
+  index_t _col;
+  index_t _row;
+
+public:
+  GridIterator(const Grid<T>* grid, index_t startCol, index_t endCol,
+    index_t startRow, index_t endRow) : _grid(grid), _startCol(startCol),
+    _endCol(endCol), _startRow(startRow), _endRow(endRow), _col(startCol),
+    _row(startRow) {
+  }
+  ~GridIterator() {}
+
+  void moveToEnd() {
+    _col = _endCol;
+    _row = _endRow;
+  }
+
+  bool operator==(const GridIterator& other) {
+    return _grid == other._grid && _col == other._col && _row == other._row;
+  }
+
+  GridIterator& operator++() {
+    _col++;
+    if (_col == _endCol) {
+      _row++;
+      _col = _startCol;
+    }
+  }
+
+  GridIterator& operator++(int) {
+    GridIterator temp = *this;
+    ++*this;
+    return temp;
+  }
+
+  T& operator*() {
+    return *_grid->at(_row, _col);
   }
 };
 

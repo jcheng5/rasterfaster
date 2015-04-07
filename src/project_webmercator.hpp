@@ -61,7 +61,8 @@ public:
       double srcX = (lng + 180) / 360 * pSrc->ncol();
       double srcY = (1 - (lat + 90) / 180) * pSrc->nrow();
 
-      *pTgt->at(y, x) = pInterp->getValue(*pSrc, srcX, srcY);
+      *pTgt->at(y, x) = pInterp->getValue(*pSrc, srcX, srcY,
+        -1, -1);
     }
   }
 };
