@@ -47,16 +47,15 @@ public:
     // One of the +1 is for the same reason.
     // The other +1 is to make right and bottom exclusive, not inclusive.
     index_t right = left + (width/2)*2 + 1 + 1;
-    index_t bottom = top + (top/2)*2 + 1 + 1;
+    index_t bottom = top + (height/2)*2 + 1 + 1;
 
-    std::vector<T> vec(left*top);
+    std::vector<T> vec;
+    vec.reserve(width*height);
     for (index_t y1 = top; y1 < bottom; y1++) {
       for (index_t x1 = left; x1 < right; x1++) {
         vec.push_back(*src.at(y1, x1));
       }
     }
-
-    std::cerr << "[" << vec.size() << "]\n";
 
     T result;
     if (!mode<T>(vec, &result))
