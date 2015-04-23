@@ -3,20 +3,22 @@
 
 using namespace Rcpp;
 
+typedef long double ldouble_t;
+
 template<>
 double mean(double* begin, double* end) {
-  long double result = 0;
+  ldouble_t result = 0;
   size_t length = end - begin;
 
   for (double* p = begin; p != end; p++) {
-    result += static_cast<long double>(*p);
+    result += static_cast<ldouble_t>(*p);
   }
   result /= length;
 
-  if (std::numeric_limits<long double>::infinity() != result) {
-    long double strip = 0;
+  if (std::numeric_limits<ldouble_t>::infinity() != result) {
+    ldouble_t strip = 0;
     for (double* p = begin; p != end; p++) {
-      strip += static_cast<long double>(*p) - result;
+      strip += static_cast<ldouble_t>(*p) - result;
     }
     result += strip / length;
   }
