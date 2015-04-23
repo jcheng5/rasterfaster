@@ -1,5 +1,5 @@
-#ifndef PROJECT_WEBMERCATOR_HPP
-#define PROJECT_WEBMERCATOR_HPP
+#ifndef PROJECT_ALGOS_HPP
+#define PROJECT_ALGOS_HPP
 
 #include <cmath>
 
@@ -26,6 +26,29 @@ public:
     *lng = x * 360 - 180;
     double lat_rad = atan(sinh(PI * (1 - 2*y)));
     *lat = lat_rad * 180 / PI;
+  }
+};
+
+template <class T>
+class MollweideProjection : public Projection<T> {
+public:
+  // Reverse-project x and y values (between 0 and 1) to lng/lat in degrees.
+  void reverse(double x, double y, double* lng, double* lat) {
+    // From Wikipedia.
+    const double R = 1;
+    const double lambda0 = 0;
+    const double r_sqrt2 = R * sqrt(2);
+    x = x * (4 * r_sqrt2);
+    x -= 2 * r_sqrt2;
+    y = y * (4 * r_sqrt2);
+    y -= 2 * r_sqrt2;
+
+    double theta = asin(y / (r_sqrt2));
+    double phi = asin((2*theta + sin(2*theta)) / PI);
+    double lambda = lambda0 + (PI * x) / (2 * r_sqrt2 * cos(theta));
+
+    *lng = lambda * 180.0 / PI;
+    *lat = phi * -180.0 / PI;
   }
 };
 
@@ -70,6 +93,8 @@ template <class T>
 boost::shared_ptr<Projection<T> > getProjection(const std::string& name) {
   if (name == "epsg:3857") {
     return boost::shared_ptr<Projection<T> >(new WebMercatorProjection<T>());
+  } else if (name == "mollweide") {
+    return boost::shared_ptr<Projection<T> >(new MollweideProjection<T>());
   } else {
     return boost::shared_ptr<Projection<T> >();
   }

@@ -5,7 +5,7 @@
 #include "mmfile.hpp"
 #include "grid.hpp"
 #include "resample_algos.hpp"
-#include "project_webmercator.hpp"
+#include "project_algos.hpp"
 
 template <class T>
 void project_files(

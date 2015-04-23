@@ -5,7 +5,8 @@
 \title{Create a web map tile}
 \usage{
 createMapTile(x, width, height, xtile, ytile, zoom,
-  projection = c("epsg:3857"), method = c("auto", "bilinear", "ngb"))
+  projection = c("epsg:3857", "mollweide"), method = c("auto", "bilinear",
+  "ngb"))
 }
 \arguments{
 \item{x}{A \code{Raster} object (as created by \code{raster::raster()}) with

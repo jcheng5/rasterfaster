@@ -135,7 +135,7 @@ resampleTo <- function(x, nrow = 180, ncol = 360, method = c("bilinear", "ngb"))
 #'
 #' @export
 createMapTile <- function(x, width, height, xtile, ytile, zoom,
-  projection = c("epsg:3857"), method = c("auto", "bilinear", "ngb")) {
+  projection = c("epsg:3857", "mollweide"), method = c("auto", "bilinear", "ngb")) {
 
   projection <- match.arg(projection)
   method <- match.arg(method)
@@ -176,7 +176,13 @@ createMapTile <- function(x, width, height, xtile, ytile, zoom,
   )
 
   result <- raster(outfile)
-  crs(result) <- sp::CRS("+init=epsg:3857 +proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs")
+
+  # Just guessing at these
+  if (projection == "epsg:3857") {
+    crs(result) <- sp::CRS("+init=epsg:3857 +proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs")
+  } else if (projection == "mollweide") {
+    crs(result) <- sp::CRS("+proj=moll +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
+  }
   result@data@haveminmax <- FALSE
   result
 }
