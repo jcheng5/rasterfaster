@@ -5,7 +5,7 @@ This package is intended to provide faster but potentially less general/flexible
 ## Features
 
 1. Resampling (nearest neighbor and bilinear)
-2. WGS84 to Web Mercator or Mollweide projection, and map tile extraction
+2. WGS84 to Web Mercator projection, and map tile extraction
 
 Currently only `.grd` files (as created by `raster::writeRaster`) with `numeric` data are supported.
 
