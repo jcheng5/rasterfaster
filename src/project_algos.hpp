@@ -81,10 +81,19 @@ public:
 
       pProj->reverse(xNorm, yNorm, &lng, &lat);
 
-      double srcX = (lng + 180) / 360 * pSrc->ncol();
-      double srcY = (1 - (lat + 90) / 180) * pSrc->nrow();
+      double srcXNorm = (lng - lng1) / (lng2 - lng1);
+      double srcYNorm = 1 - (lat - lat1) / (lat2 - lat1);
 
-      *pTgt->at(y, x) = pInterp->getValue(*pSrc, srcX, srcY);
+      if (srcXNorm >= 0 && srcXNorm < 1 && srcYNorm >= 0 && srcYNorm < 1) {
+        *pTgt->at(y, x) = pInterp->getValue(*pSrc,
+          srcXNorm * pSrc->ncol(),
+          srcYNorm * pSrc->nrow());
+      } else {
+        // The data lies outside of the bounds of the source image; use
+        // NA as the value
+        *pTgt->at(y, x) = -std::numeric_limits<double>::max();
+      }
+
     }
   }
 };
