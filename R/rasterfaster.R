@@ -208,6 +208,47 @@ findMode <- function(x, na.rm = FALSE) {
   doFindMode(x)
 }
 
+#' Fast color interpolation
+#'
+#' Returns a function that maps the interval [0,1] to a set of colors. Similar
+#' to \code{\link[grDevices]{colorRamp}}, but with better performance for large
+#' numeric vectors, and provides results in \code{"#RRGGBB"} (or
+#' \code{"#RRGGBBAA"}) character form instead of RGB color matrices.
+#'
+#' @param colors Colors to interpolate; must be a valid argument to
+#'   \code{\link[grDevices]{col2rgb}}. This can be a character vector of
+#'   \code{"#RRGGBB"} or  \code{"#RRGGBBAA"}, color names from
+#'   \code{\link[grDevices]{colors}}, or a positive integer that indexes into
+#'   \code{\link[grDevices]{palette}()}.
+#' @param na.color The color to map to \code{NA} values (for example,
+#'   \code{"#606060"} for dark grey, or \code{"#00000000"} for transparent) and
+#'   values outside of [0,1]. Can itself by \code{NA}, which will simply cause
+#'   an \code{NA} to be inserted into the output.
+#' @param alpha Whether to include alpha channels in interpolation; otherwise,
+#'   any alpha information will be discarded. If \code{TRUE} then the returned
+#'   function will provide colors in \code{"#RRGGBBAA"} format instead of
+#'   \code{"#RRGGBB"}.
+#'
+#' @return A function that takes a numeric vector and returns a character vector
+#'   of the same length with RGB or RGBA hex colors.
+#'
+#' @seealso \link[grDevices]{colorRamp}
+#'
+#' @export
+createColorRamp <- function(colors, na.color = NA, alpha = FALSE) {
+  if (length(colors) == 0) {
+    stop("Must provide at least one color to create a color ramp")
+  }
+
+  colorMatrix <- col2rgb(colors, alpha = alpha)
+  structure(
+    function(x) {
+      doColorRamp(colorMatrix, x, alpha, ifelse(is.na(na.color), "", na.color))
+    },
+    safe_palette_func = TRUE
+  )
+}
+
 quote({
 library(rasterfaster);library(raster);library(digest);library(testthat)
 system.time(r <- resampleBy(raster("testdata/shipping.grd"), 0.5)); plot(r)

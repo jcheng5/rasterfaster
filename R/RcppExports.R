@@ -9,6 +9,10 @@ findMean <- function(x) {
     .Call('rasterfaster_findMean', PACKAGE = 'rasterfaster', x)
 }
 
+doColorRamp <- function(colors, x, alpha, naColor) {
+    .Call('rasterfaster_doColorRamp', PACKAGE = 'rasterfaster', colors, x, alpha, naColor)
+}
+
 do_project <- function(name, from, fromStride, fromRows, fromCols, lng1, lng2, lat1, lat2, to, toStride, toRows, toCols, x, y, totalWidth, totalHeight, dataFormat, method) {
     invisible(.Call('rasterfaster_do_project', PACKAGE = 'rasterfaster', name, from, fromStride, fromRows, fromCols, lng1, lng2, lat1, lat2, to, toStride, toRows, toCols, x, y, totalWidth, totalHeight, dataFormat, method))
 }

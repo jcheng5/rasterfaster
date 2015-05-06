@@ -27,6 +27,20 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
+// doColorRamp
+StringVector doColorRamp(NumericMatrix colors, NumericVector x, bool alpha, std::string naColor);
+RcppExport SEXP rasterfaster_doColorRamp(SEXP colorsSEXP, SEXP xSEXP, SEXP alphaSEXP, SEXP naColorSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< NumericMatrix >::type colors(colorsSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< bool >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< std::string >::type naColor(naColorSEXP);
+    __result = Rcpp::wrap(doColorRamp(colors, x, alpha, naColor));
+    return __result;
+END_RCPP
+}
 // do_project
 void do_project(const std::string& name, const std::string& from, int fromStride, int fromRows, int fromCols, int lng1, int lng2, int lat1, int lat2, const std::string& to, int toStride, int toRows, int toCols, int x, int y, int totalWidth, int totalHeight, const std::string& dataFormat, const std::string& method);
 RcppExport SEXP rasterfaster_do_project(SEXP nameSEXP, SEXP fromSEXP, SEXP fromStrideSEXP, SEXP fromRowsSEXP, SEXP fromColsSEXP, SEXP lng1SEXP, SEXP lng2SEXP, SEXP lat1SEXP, SEXP lat2SEXP, SEXP toSEXP, SEXP toStrideSEXP, SEXP toRowsSEXP, SEXP toColsSEXP, SEXP xSEXP, SEXP ySEXP, SEXP totalWidthSEXP, SEXP totalHeightSEXP, SEXP dataFormatSEXP, SEXP methodSEXP) {
