@@ -28,10 +28,11 @@ A function that takes a numeric vector and returns a character vector
   of the same length with RGB or RGBA hex colors.
 }
 \description{
-Returns a function that maps the interval [0,1] to a set of colors. Similar
-to \code{\link[grDevices]{colorRamp}}, but with better performance for large
-numeric vectors, and provides results in \code{"#RRGGBB"} (or
-\code{"#RRGGBBAA"}) character form instead of RGB color matrices.
+Returns a function that maps the interval [0,1] to a set of colors.
+Interpolation is performed in the CIELAB color space. Similar to
+\code{\link[grDevices]{colorRamp(space = 'Lab')}}, but hundreds of times
+faster, and provides results in \code{"#RRGGBB"} (or \code{"#RRGGBBAA"})
+character form instead of RGB color matrices.
 }
 \seealso{
 \link[grDevices]{colorRamp}
