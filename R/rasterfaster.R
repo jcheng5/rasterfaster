@@ -103,7 +103,7 @@ resampleBy <- function(x, factor, method = c("bilinear", "ngb")) {
 
   y <- x
   nrow(y) <- ceiling(nrow(x) * factor)
-  ncol(y) <- ceiling(nrow(y) * factor)
+  ncol(y) <- ceiling(ncol(x) * factor)
   resampleLayer(x, y, method)
 }
 
