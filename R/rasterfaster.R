@@ -187,6 +187,45 @@ createMapTile <- function(x, width, height, xtile, ytile, zoom,
   result
 }
 
+#' @export
+projectTo <- function(x, width, height, projection = c("epsg:3857",
+  "mollweide"), method = c("auto", "bilinear", "ngb")
+) {
+  projection <- match.arg(projection)
+  method <- match.arg(method)
+
+  # TODO: Validate parameters
+
+  y <- x
+
+  verifyInputRaster(x, "projectTo")
+  outfile <- createOutputGrdFile(x, y)
+  inFile <- grdToGri(x@file@name)
+
+  #(name, from, fromStride, fromRows, fromCols, lng1, lng2, lat1, lat2,
+  #to, toStride, toRows, toCols, x, y, totalWidth, totalHeight, dataFormat, method) {
+  do_project(projection, inFile, ncol(x), nrow(x), ncol(x),
+    xmin(x), xmax(x), ymin(x), ymax(x),
+    grdToGri(outfile), ncol(y), nrow(y), ncol(y),
+    0, 0, ncol(y), nrow(y), x@file@datanotation,
+    method)
+
+  result <- raster(outfile)
+
+  # Just guessing at these
+  if (projection == "epsg:3857") {
+    resultCrs <- sp::CRS("+init=epsg:3857 +proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs")
+  } else if (projection == "mollweide") {
+    resultCrs <- sp::CRS("+proj=moll +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
+  }
+
+  extent(result) <- projectExtent(y, crs = resultCrs)
+  crs(result) <- resultCrs
+
+  result@data@haveminmax <- FALSE
+  result
+}
+
 #' Find the mode for a vector
 #'
 #' Calculates the mode for integer, real, character, and logical vectors. In
