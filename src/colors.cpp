@@ -191,9 +191,9 @@ public:
 
         double red, green, blue;
         lab2srgb(l, a, b, &red, &green, &blue);
-        red = ::round(red * 255);
-        green = ::round(green * 255);
-        blue = ::round(blue * 255);
+        red = std::max(0.0, std::min(255.0, ::round(red * 255)));
+        green = std::max(0.0, std::min(255.0, ::round(green * 255)));
+        blue = std::max(0.0, std::min(255.0, ::round(blue * 255)));
 
         // Convert the result to hex string
         if (!alpha)
@@ -226,54 +226,6 @@ StringVector doColorRampParallel(NumericMatrix colors, NumericVector x, bool alp
         result[i] = naColor;
     } else {
       result[i] = crw.result[i];
-    }
-  }
-  return result;
-}
-
-// Same as doColorRampParallel, but doesn't use multiple cores. Not that much
-// slower than the parallel version, actually.
-StringVector doColorRampSerial(NumericMatrix colors, NumericVector x, bool alpha, std::string naColor) {
-
-  size_t ncolors = colors.ncol();
-
-  StringVector result(x.length());
-  for (size_t i = 0; i < x.length(); i++) {
-    double xval = x[i];
-    if (xval < 0 || xval > 1 || R_IsNA(xval)) {
-      if (naColor.empty())
-        result[i] = NA_STRING;
-      else
-        result[i] = naColor;
-    } else {
-      xval *= ncolors - 1;
-      size_t colorOffset = static_cast<size_t>(::floor(xval));
-      double r, g, b;
-      double a = 0;
-      if (colorOffset == ncolors - 1) {
-        // Just use the top color
-        r = colors(0, colorOffset);
-        g = colors(1, colorOffset);
-        b = colors(2, colorOffset);
-        if (alpha) {
-          a = colors(3, colorOffset);
-        }
-      } else {
-        // Do a linear interp between the two closest colors
-        double factorB = xval - colorOffset;
-        double factorA = colorOffset + 1 - xval;
-        r = ::round(factorA * colors(0, colorOffset) + factorB * colors(0, colorOffset + 1));
-        g = ::round(factorA * colors(1, colorOffset) + factorB * colors(1, colorOffset + 1));
-        b = ::round(factorA * colors(2, colorOffset) + factorB * colors(2, colorOffset + 1));
-        if (alpha) {
-          a = ::round(factorA * colors(3, colorOffset) + factorB * colors(3, colorOffset + 1));
-        }
-      }
-
-      if (!alpha)
-        result[i] = rgbcolor(r, g, b);
-      else
-        result[i] = rgbacolor(r, g, b, a);
     }
   }
   return result;
