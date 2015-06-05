@@ -250,6 +250,12 @@ createColorRamp <- function(colors, na.color = NA, alpha = FALSE) {
   )
 }
 
+#' @export
+mipmap <- function(x) {
+  dx <- dim(x)
+  doMipmap(x, dx[0], dx[1], dx[2])
+}
+
 quote({
 library(rasterfaster);library(raster);library(digest);library(testthat)
 system.time(r <- resampleBy(raster("testdata/shipping.grd"), 0.5)); plot(r)
